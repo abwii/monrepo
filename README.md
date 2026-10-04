@@ -1,4 +1,4 @@
-# monrepo
+# prod-ready-template
 
 Monorepo pnpm + Turborepo : front Next.js, API Fastify, Postgres.
 
