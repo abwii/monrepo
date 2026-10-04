@@ -47,3 +47,8 @@ apps/api ──✗ packages/ui, apps/web
 - **TypeScript 6.0** (pas 7) et **ESLint 9** (pas 10) : `typescript-eslint` et `eslint-plugin-react` ne les supportent pas encore.
 - **`/health` ≠ `/ready`** : la liveness ne touche pas la DB, sinon une panne Postgres redémarrerait l'API en boucle.
 - L'API reçoit sa DB par injection (`Database.ping()`), donc les tests tournent sans Postgres.
+
+## Déploiement
+
+Staging automatique sur `main`, production sur tag `vX.Y.Z` avec reviewer requis, rollback par tag
+(Fly.io, images GHCR). Procédure complète : [docs/DEPLOY.md](docs/DEPLOY.md).

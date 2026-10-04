@@ -1,0 +1,46 @@
+# Rollback : redéploie une image existante (vX.Y.Z ou sha-xxxxxxx). Rien n'est reconstruit.
+# Sur `production`, la même approbation de reviewer que pour un déploiement s'applique.
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environnement cible
+        type: choice
+        options: [staging, production]
+        required: true
+      tag:
+        description: "Tag à restaurer (ex. v1.2.0 ou sha-1a2b3c4)"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify images exist
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Check both images exist for the tag
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          [[ "$TAG" =~ ^(v[0-9]+\.[0-9]+\.[0-9]+|sha-[0-9a-f]{7})$ ]] \
+            || { echo "::error::Tag invalide: $TAG"; exit 1; }
+          repo="ghcr.io/${GITHUB_REPOSITORY,,}"
+          for app in api web; do
+            docker buildx imagetools inspect "$repo-$app:$TAG" >/dev/null \
+              || { echo "::error::Image $repo-$app:$TAG introuvable"; exit 1; }
+          done
+
+  rollback:
+    needs: verify
+    uses: ./.github/workflows/_deploy.yml
+    with:
+      environment: ${{ inputs.environment }}
+      tag: ${{ inputs.tag }}
