@@ -50,5 +50,6 @@ apps/api ──✗ packages/ui, apps/web
 
 ## Déploiement
 
+Mode d'emploi du template : [docs/USAGE.md](docs/USAGE.md).
 Staging automatique sur `main`, production sur tag `vX.Y.Z` avec reviewer requis, rollback par tag
 (Fly.io, images GHCR). Procédure complète : [docs/DEPLOY.md](docs/DEPLOY.md).
