@@ -129,7 +129,24 @@ jobs:
     name: Deploy to staging
     needs: [docker, smoke, image-tag]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    uses: ./.github/workflows/_deploy.yml
-    with:
-      environment: staging
-      tag: ${{ needs.image-tag.outputs.tag }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Un seul déploiement à la fois par environnement, sans jamais en interrompre un en cours.
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+    environment:
+      name: staging
+      url: ${{ vars.WEB_URL }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/fly-deploy
+        with:
+          tag: ${{ needs.image-tag.outputs.tag }}
+          fly-token-api: ${{ secrets.FLY_API_TOKEN_API }}
+          fly-token-web: ${{ secrets.FLY_API_TOKEN_WEB }}
+          app-api: ${{ vars.FLY_APP_API }}
+          app-web: ${{ vars.FLY_APP_WEB }}
+          api-url: ${{ vars.API_URL }}
+          web-url: ${{ vars.WEB_URL }}

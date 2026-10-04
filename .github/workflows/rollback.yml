@@ -38,9 +38,28 @@ jobs:
               || { echo "::error::Image $repo-$app:$TAG introuvable"; exit 1; }
           done
 
+  # Sur `production`, la même approbation de reviewer que pour un déploiement s'applique.
   rollback:
+    name: Roll back ${{ inputs.environment }} to ${{ inputs.tag }}
     needs: verify
-    uses: ./.github/workflows/_deploy.yml
-    with:
-      environment: ${{ inputs.environment }}
-      tag: ${{ inputs.tag }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Un seul déploiement à la fois par environnement, sans jamais en interrompre un en cours.
+    concurrency:
+      group: deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ vars.WEB_URL }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/fly-deploy
+        with:
+          tag: ${{ inputs.tag }}
+          fly-token-api: ${{ secrets.FLY_API_TOKEN_API }}
+          fly-token-web: ${{ secrets.FLY_API_TOKEN_WEB }}
+          app-api: ${{ vars.FLY_APP_API }}
+          app-web: ${{ vars.FLY_APP_WEB }}
+          api-url: ${{ vars.API_URL }}
+          web-url: ${{ vars.WEB_URL }}
