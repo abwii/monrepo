@@ -80,3 +80,6 @@ Les tags disponibles : GitHub > Packages > `<repo>-api` > Tags.
 - Machines en scale-to-zero (`min_machines_running = 0`) : premier appel lent après inactivité.
   Passez à 1 dans `apps/*/fly.toml` si la latence compte en production.
 - Déploiement *rolling* : Fly abandonne la release si le health check `/health` échoue.
+- Le déploiement est une **action composite** (`.github/actions/fly-deploy`), pas un workflow
+  réutilisable : un workflow appelé ne reçoit pas les *secrets d'environnement* comme un job
+  normal (ils arrivent vides). Chaque job de déploiement déclare donc lui-même `environment:`.
