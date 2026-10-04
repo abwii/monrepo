@@ -32,6 +32,7 @@ Le premier push sur `main` fera échouer `deploy-staging` avec un message clair 
     (`Lint, typecheck, test, build`, `Smoke test (docker compose)`, `Image api`, `Image web`)
   - `release-tags`, **Active**, cible le motif `v*` : *Restrict deletions*, *Block force pushes*
 - [ ] Après le 1er run sur `main` : paquets GHCR `<repo>-api` et `<repo>-web` en **Public**, puis *Re-run failed jobs*
+- [ ] Automatisation du dépôt (voir §6) : alertes Dependabot, CodeQL, app Claude + secret `ANTHROPIC_API_KEY`
 - [ ] Vérifier `/health` et `/ready` sur staging, puis tag `v0.1.0` pour la production
 
 ## 2. Développer
@@ -72,3 +73,28 @@ Limite : après une migration de schéma, une image plus ancienne peut ne plus �
 - Pull d'image refusé par Fly : paquet GHCR encore privé (renommer le dépôt crée de nouveaux paquets).
 - `WEB_URL` / `API_URL` avec faute de frappe : le smoke test échoue alors que le déploiement a réussi.
 - Un token ou un mot de passe collé dans un chat, une issue ou un commit est compromis : le renouveler.
+
+## 6. Automatisation du dépôt
+
+Déjà dans le template (rien à écrire, quelques réglages à faire) :
+
+| Élément | Fichier | À faire une fois |
+|---|---|---|
+| Dependabot (npm, actions, Docker, compose), hebdo, groupé | `.github/dependabot.yml` | Settings → Advanced Security : activer *Dependabot alerts* et *security updates* |
+| CodeQL (JS/TS + workflows), sur PR, `main` et chaque lundi | `.github/workflows/codeql.yml` | Laisser *Code scanning → Default setup* **désactivé** (il entrerait en conflit) |
+| Templates d'issue (bug, fonctionnalité) et de PR | `.github/ISSUE_TEMPLATE/`, `pull_request_template.md` | rien |
+| Consignes pour Claude Code : commandes, conventions, définition de fini | `CLAUDE.md` | rien |
+| `@claude` dans issues et PR | `.github/workflows/claude.yml` | voir ci-dessous |
+
+**`@claude`** : le workflow ne démarre que pour un propriétaire, membre ou collaborateur (le dépôt est public),
+avec `contents/pull-requests/issues: write` seulement, 20 tours maximum et un Bash limité à `pnpm install|test|lint|typecheck|build`
+et `pnpm turbo run`. Il ne pousse jamais sur `main` (ruleset) : il ouvre une branche, vous créez la PR.
+
+1. Installer l'app GitHub **Claude** sur le dépôt (`/install-github-app` dans Claude Code, ou la page de l'app).
+2. Settings → Secrets and variables → Actions → **New repository secret** : `ANTHROPIC_API_KEY`.
+3. Console Anthropic : **plafonner la dépense** de la clé (limite mensuelle) avant la première utilisation.
+4. Utiliser : commenter `@claude …` sur une issue ou une PR. Ne l'invoquer que sur du contenu de confiance :
+   un texte écrit par un tiers peut tenter de détourner ses instructions.
+
+Les PR de Dependabot suivent les mêmes règles que les autres : CI verte requise, merge manuel. Ses PR n'ont pas accès
+aux secrets (inutile : la CI n'en utilise pas).
