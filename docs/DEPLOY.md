@@ -1,5 +1,7 @@
 # Déploiement (Fly.io)
 
+> Mode d'emploi du template (checklist, workflow quotidien, rollback) : [USAGE.md](USAGE.md).
+
 ```
 push sur main ──▶ CI (check, images :sha-xxxxxxx, smoke) ──▶ deploy-staging   (automatique)
 tag vX.Y.Z    ──▶ release : retag sha-xxxxxxx → vX.Y.Z ──▶ deploy-production (reviewer requis)
