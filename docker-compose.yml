@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?copiez .env.example vers .env}
       POSTGRES_DB: ${POSTGRES_DB:?copiez .env.example vers .env}
     ports:
-      - "127.0.0.1:5432:5432" # exposé en local uniquement
+      - "127.0.0.1:${DB_PORT:-5432}:5432" # exposé en local uniquement
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
