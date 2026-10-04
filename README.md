@@ -1,6 +1,6 @@
 # prod-ready-template
 
-[![CI](https://github.com/abwii/monrepo/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/abwii/monrepo/actions/workflows/ci.yml)
+[![CI](https://github.com/abwii/prod-ready-template/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/abwii/prod-ready-template/actions/workflows/ci.yml)
 
 Monorepo pnpm + Turborepo : front Next.js, API Fastify, Postgres.
 

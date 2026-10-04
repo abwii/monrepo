@@ -21,11 +21,38 @@ for env in staging prod; do
 done
 
 # La base est un simple secret : Fly Managed Postgres (dès ~38 $/mois), Neon, Supabase…
-fly secrets set DATABASE_URL='postgres://…' --app <projet>-api-staging --stage
-fly secrets set DATABASE_URL='postgres://…' --app <projet>-api-prod --stage
+# Collez la chaîne de connexion fournie par votre base, entre apostrophes.
+fly secrets set DATABASE_URL='<chaîne de connexion>' --app <projet>-api-staging --stage
+fly secrets set DATABASE_URL='<chaîne de connexion>' --app <projet>-api-prod --stage
 ```
 
+Forme attendue (exemple Neon) :
+
+```
+postgresql://<user>:<mot-de-passe>@<hôte-complet>/<base>?sslmode=verify-full
+```
+
+Points d'attention, tous rencontrés en pratique :
+
+- **Hôte complet** : `ep-xxx.c-2.eu-west-2.aws.neon.tech`, pas seulement `ep-xxx`
+  (sinon `getaddrinfo ENOTFOUND` et `/ready` renvoie 503).
+- **Connexion directe** (sans `-pooler` dans l'hôte) : le pool `pg` de l'API suffit, et le pooleur
+  gêne les migrations.
+- **`sslmode=verify-full`** : `pg` traite `require` comme `verify-full` et l'annonce par un avertissement ;
+  on le dit explicitement. Inutile d'ajouter `channel_binding`.
+- Ne collez jamais cette URL (elle contient le mot de passe) dans un chat, une issue ou un commit.
+  Si elle fuite, réinitialisez le mot de passe chez le fournisseur.
+- Après un changement de secret sans `--stage`, les machines redémarrent ; avec `--stage`,
+  il prend effet au prochain déploiement.
+
 `DATABASE_URL` vit **chez Fly uniquement**. GitHub ne le voit jamais.
+
+Sous Windows (PowerShell), les boucles s'écrivent :
+
+```powershell
+$p = "<projet>"
+foreach ($e in "staging","prod") { fly apps create "$p-api-$e"; fly apps create "$p-web-$e" }
+```
 
 ### 2. Tokens de déploiement (un par app : un token Fly est limité à une app)
 
@@ -40,6 +67,8 @@ Copiez chaque token en entier, préfixe `FlyV1 ` compris.
 
 Après le premier run de CI sur `main` : GitHub > Packages > `<repo>-api` et `<repo>-web` >
 Package settings > *Change visibility* > Public. Fly tire alors les images sans authentification.
+**Renommer le dépôt change le nom des images** (`ghcr.io/<owner>/<repo>-api`) : les nouveaux paquets
+sont créés privés au premier run de CI et doivent être rendus publics à leur tour.
 
 ### 4. Environnements GitHub (Settings > Environments)
 
