@@ -18,4 +18,10 @@ export default tseslint.config(
       ],
     },
   },
+  // Les fichiers de config JS ne font pas partie du projet TS : pas de type-check.
+  // Doit rester en dernier pour surcharger projectService.
+  {
+    files: ["**/*.{js,mjs,cjs}"],
+    ...tseslint.configs.disableTypeChecked,
+  },
 );
