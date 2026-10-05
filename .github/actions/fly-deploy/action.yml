@@ -47,7 +47,7 @@ runs:
           [[ -n "${!v}" ]] || { echo "::error::$v manquant : vérifiez les secrets et variables de l'environnement GitHub"; exit 1; }
         done
 
-    - uses: superfly/flyctl-actions/setup-flyctl@1.5
+    - uses: superfly/flyctl-actions/setup-flyctl@1.6
 
     # Même tag pour les deux apps : api et web partent ensemble.
     # Un deploy token Fly est limité à une app : chaque étape ne voit que le sien.
