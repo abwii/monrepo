@@ -41,7 +41,14 @@ jobs:
       contents: write # pousser une branche (jamais main : protégée par ruleset)
       pull-requests: write # commenter les PR
       issues: write # commenter les issues
+      id-token: write # jeton OIDC court, échangé contre un jeton de l'app Claude (aucun accès au dépôt)
     steps:
+      - name: Check ANTHROPIC_API_KEY
+        env:
+          KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          [[ -n "$KEY" ]] || { echo "::error::Secret ANTHROPIC_API_KEY manquant (Settings > Secrets and variables > Actions)"; exit 1; }
+
       - uses: actions/checkout@v7
         with:
           fetch-depth: 1

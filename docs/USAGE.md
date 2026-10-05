@@ -87,7 +87,7 @@ Déjà dans le template (rien à écrire, quelques réglages à faire) :
 | `@claude` dans issues et PR | `.github/workflows/claude.yml` | voir ci-dessous |
 
 **`@claude`** : le workflow ne démarre que pour un propriétaire, membre ou collaborateur (le dépôt est public),
-avec `contents/pull-requests/issues: write` seulement, 20 tours maximum et un Bash limité à `pnpm install|test|lint|typecheck|build`
+avec `contents/pull-requests/issues: write` et `id-token: write` (jeton OIDC court pour l'app Claude : requis même avec une clé API) seulement, 20 tours maximum et un Bash limité à `pnpm install|test|lint|typecheck|build`
 et `pnpm turbo run`. Il ne pousse jamais sur `main` (ruleset) : il ouvre une branche, vous créez la PR.
 
 1. Installer l'app GitHub **Claude** sur le dépôt (`/install-github-app` dans Claude Code, ou la page de l'app).
