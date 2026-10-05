@@ -1,5 +1,6 @@
 # @claude dans une issue, une PR ou une revue : analyse, propose, ouvre une branche.
-# Prérequis (une fois) : app GitHub « Claude » installée sur le dépôt + secret ANTHROPIC_API_KEY.
+# Prérequis (une fois) : app GitHub « Claude » installée sur le dépôt + secret CLAUDE_CODE_OAUTH_TOKEN
+# (jeton de l'abonnement Claude, généré avec `claude setup-token` : pas de facturation API séparée).
 # Dépôt public : le workflow ne démarre que pour le propriétaire, un membre ou un collaborateur.
 name: Claude
 
@@ -43,11 +44,11 @@ jobs:
       issues: write # commenter les issues
       id-token: write # jeton OIDC court, échangé contre un jeton de l'app Claude (aucun accès au dépôt)
     steps:
-      - name: Check ANTHROPIC_API_KEY
+      - name: Check CLAUDE_CODE_OAUTH_TOKEN
         env:
-          KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          KEY: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
-          [[ -n "$KEY" ]] || { echo "::error::Secret ANTHROPIC_API_KEY manquant (Settings > Secrets and variables > Actions)"; exit 1; }
+          [[ -n "$KEY" ]] || { echo "::error::Secret CLAUDE_CODE_OAUTH_TOKEN manquant (voir docs/USAGE.md §6)"; exit 1; }
 
       - uses: actions/checkout@v7
         with:
@@ -63,7 +64,7 @@ jobs:
 
       - uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # Borne le coût et la surface : peu de tours, et seulement les commandes de vérification
           # (pas de `pnpm exec`, pas de `curl`, pas de shell libre).
           claude_args: |

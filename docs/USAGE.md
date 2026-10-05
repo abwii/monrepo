@@ -32,7 +32,7 @@ Le premier push sur `main` fera échouer `deploy-staging` avec un message clair 
     (`Lint, typecheck, test, build`, `Smoke test (docker compose)`, `Image api`, `Image web`)
   - `release-tags`, **Active**, cible le motif `v*` : *Restrict deletions*, *Block force pushes*
 - [ ] Après le 1er run sur `main` : paquets GHCR `<repo>-api` et `<repo>-web` en **Public**, puis *Re-run failed jobs*
-- [ ] Automatisation du dépôt (voir §6) : alertes Dependabot, CodeQL, app Claude + secret `ANTHROPIC_API_KEY`
+- [ ] Automatisation du dépôt (voir §6) : alertes Dependabot, CodeQL, app Claude + secret `CLAUDE_CODE_OAUTH_TOKEN`
 - [ ] Vérifier `/health` et `/ready` sur staging, puis tag `v0.1.0` pour la production
 
 ## 2. Développer
@@ -87,14 +87,19 @@ Déjà dans le template (rien à écrire, quelques réglages à faire) :
 | `@claude` dans issues et PR | `.github/workflows/claude.yml` | voir ci-dessous |
 
 **`@claude`** : le workflow ne démarre que pour un propriétaire, membre ou collaborateur (le dépôt est public),
-avec `contents/pull-requests/issues: write` et `id-token: write` (jeton OIDC court pour l'app Claude : requis même avec une clé API) seulement, 20 tours maximum et un Bash limité à `pnpm install|test|lint|typecheck|build`
+avec `contents/pull-requests/issues: write` et `id-token: write` (jeton OIDC court pour l'app Claude : requis, clé API ou non) seulement, 20 tours maximum et un Bash limité à `pnpm install|test|lint|typecheck|build`
 et `pnpm turbo run`. Il ne pousse jamais sur `main` (ruleset) : il ouvre une branche, vous créez la PR.
 
 1. Installer l'app GitHub **Claude** sur le dépôt (`/install-github-app` dans Claude Code, ou la page de l'app).
-2. Settings → Secrets and variables → Actions → **New repository secret** : `ANTHROPIC_API_KEY`.
-3. Console Anthropic : **plafonner la dépense** de la clé (limite mensuelle) avant la première utilisation.
+2. Dans un terminal : `claude setup-token` (connexion à votre abonnement Claude dans le navigateur), puis copier le jeton affiché.
+3. Settings → Secrets and variables → Actions → **New repository secret** : `CLAUDE_CODE_OAUTH_TOKEN`. Ne jamais le coller ailleurs ;
+   s'il fuite, le révoquer et en régénérer un.
 4. Utiliser : commenter `@claude …` sur une issue ou une PR. Ne l'invoquer que sur du contenu de confiance :
    un texte écrit par un tiers peut tenter de détourner ses instructions.
+
+Coût : l'usage passe sur le **quota de l'abonnement** (même fenêtre que votre usage interactif), sans facturation API séparée.
+Pour une clé API à la place (facturation à l'usage, plafond à régler dans la console Anthropic), remplacer
+`claude_code_oauth_token` par `anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}` dans `claude.yml`.
 
 Les PR de Dependabot suivent les mêmes règles que les autres : CI verte requise, merge manuel. Ses PR n'ont pas accès
 aux secrets (inutile : la CI n'en utilise pas).
