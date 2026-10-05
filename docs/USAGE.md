@@ -92,6 +92,9 @@ et `pnpm turbo run`. Il ne pousse jamais sur `main` (ruleset) : il ouvre une bra
 
 1. Installer l'app GitHub **Claude** sur le dépôt (`/install-github-app` dans Claude Code, ou la page de l'app).
 2. Dans un terminal : `claude setup-token` (connexion à votre abonnement Claude dans le navigateur), puis copier le jeton affiché.
+   **Piège** : le jeton fait ~108 caractères et le terminal peut le couper en deux lignes ; copié tel quel, il contient un saut de
+   ligne et l'API répond « Invalid auth token ». Agrandir la fenêtre, ou coller d'abord dans un éditeur de texte pour le
+   remettre sur **une seule ligne**, puis copier.
 3. Settings → Secrets and variables → Actions → **New repository secret** : `CLAUDE_CODE_OAUTH_TOKEN`. Ne jamais le coller ailleurs ;
    s'il fuite, le révoquer et en régénérer un.
 4. Utiliser : commenter `@claude …` sur une issue ou une PR. Ne l'invoquer que sur du contenu de confiance :
