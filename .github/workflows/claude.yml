@@ -49,6 +49,7 @@ jobs:
           KEY: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
           [[ -n "$KEY" ]] || { echo "::error::Secret CLAUDE_CODE_OAUTH_TOKEN manquant (voir docs/USAGE.md §6)"; exit 1; }
+          [[ ! "$KEY" =~ [[:space:]] ]] || { echo "::error::CLAUDE_CODE_OAUTH_TOKEN contient un espace ou un saut de ligne (copie depuis un terminal qui a coupé la ligne ?). Recréez le secret sur une seule ligne."; exit 1; }
 
       - uses: actions/checkout@v7
         with:
